@@ -22,20 +22,24 @@ from utils.paginator import Paginator
 
 async def main_menu(session, level, menu_name):
     banner = await orm_get_banner(session, menu_name)
+    if banner is None:
+        print(f"Банер із назвою '{menu_name}' не знайдено!")
+        return None, get_user_main_btns(level=level)
+
     image = InputMediaPhoto(media=banner.image, caption=banner.description)
-
     kbds = get_user_main_btns(level=level)
-
     return image, kbds
 
 
 async def catalog(session, level, menu_name):
     banner = await orm_get_banner(session, menu_name)
-    image = InputMediaPhoto(media=banner.image, caption=banner.description)
+    if banner is None:
+        print(f"Банер із назвою '{menu_name}' не знайдено!")
+        return None, get_user_catalog_btns(level=level, categories=[])
 
+    image = InputMediaPhoto(media=banner.image, caption=banner.description)
     categories = await orm_get_categories(session)
     kbds = get_user_catalog_btns(level=level, categories=categories)
-
     return image, kbds
 
 

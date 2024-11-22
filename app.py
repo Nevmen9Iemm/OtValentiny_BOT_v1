@@ -44,7 +44,7 @@ async def on_startup(bot):
 
 
 async def on_shutdown(bot):
-    print('бот лег')
+    print('БОТ ЛІГ')
 
 
 async def main():
