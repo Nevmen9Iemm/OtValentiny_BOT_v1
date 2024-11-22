@@ -1,0 +1,29 @@
+from aiogram.utils.formatting import Bold, as_list, as_marked_section
+
+
+categories = ['Овочі', 'Фрукти', 'Екзотичні фрукти', 'Ягоди','Зелень','Бакалія','Товари для дому', 'Кошики']
+
+description_for_info_pages = {
+    "main": "Ласкаво просимо!",
+    "about": "Продуктова крамниця OtValentiny.\nГрафік доставки замовлень - 9:00 - 21:00.",
+    "payment": as_marked_section(
+        Bold("Варіанти розрахунку:"),
+        "Термінал в магазині",
+        "При отриманні - готівка",
+        "По реквізитах",
+        marker="✅ ",
+    ).as_html(),
+    "shipping": as_list(
+        as_marked_section(
+            Bold("Варіанти доставки/замовлення:"),
+            "Курєр",
+            "Нова Пошта",
+            "Заберу сам(а)",
+            marker="✅ ",
+        ),
+        as_marked_section(Bold("Не можна:"), "Маршрутка", "Голуби", marker="❌ "),
+        sep="\n----------------------\n",
+    ).as_html(),
+    'catalog': 'Категорії:',
+    'cart': 'У кошику нічого немає!'
+}
