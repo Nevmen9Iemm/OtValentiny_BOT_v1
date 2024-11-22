@@ -144,10 +144,18 @@ async def get_menu_content(
     user_id: int | None = None,
 ):
     if level == 0:
-        return await main_menu(session, level, menu_name)
+        result = await main_menu(session, level, menu_name)
     elif level == 1:
-        return await catalog(session, level, menu_name)
+        result = await catalog(session, level, menu_name)
     elif level == 2:
-        return await products(session, level, category, page)
+        result = await products(session, level, category, page)
     elif level == 3:
-        return await carts(session, level, menu_name, page, user_id, product_id)
+        result = await carts(session, level, menu_name, page, user_id, product_id)
+    else:
+        result = None, None
+
+    if result is None:
+        print("Меню не знайдено!")
+        return None, None  # Повідомте користувача або повертайте заглушку
+
+    return result
