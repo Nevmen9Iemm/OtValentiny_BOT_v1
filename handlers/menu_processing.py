@@ -22,9 +22,13 @@ from utils.paginator import Paginator
 
 async def main_menu(session, level, menu_name):
     banner = await orm_get_banner(session, menu_name)
+
     if banner is None:
-        print(f"Банер із назвою '{menu_name}' не знайдено!")
-        return None, get_user_main_btns(level=level)
+        print(f"[main_menu] Банер із назвою '{menu_name}' не знайдено!")
+        return InputMediaPhoto(
+            media="banners/default.png",  # Заглушка
+            caption="Інформація наразі недоступна."
+        ), get_user_main_btns(level=level)
 
     image = InputMediaPhoto(media=banner.image, caption=banner.description)
     kbds = get_user_main_btns(level=level)
