@@ -3,19 +3,17 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from database.models import Banner, Cart, Category, Product, User
+from database.models import Banner, Cart, Category, Product, User, Order, OrderItem
 
 
 '''-------- Робота з банерами (інформаційні сторінки) --------------'''
 
 async def orm_add_banner_description(session: AsyncSession, data: dict):
-    '''Додаємо новий або змінюємо існуючий по іменам
-    пунктів меню: main, about, cart, shipping, payment, catalog'''
     query = select(Banner)
     result = await session.execute(query)
     if result.first():
         return
-    session.add_all([Banner(name=name, description=description) for name, description in data.items()]) 
+    session.add_all([Banner(name=name, description=description) for name, description in data.items()])
     await session.commit()
 
 
@@ -49,7 +47,7 @@ async def orm_create_categories(session: AsyncSession, categories: list):
     result = await session.execute(query)
     if result.first():
         return
-    session.add_all([Category(name=name) for name in categories]) 
+    session.add_all([Category(name=name) for name in categories])
     await session.commit()
 
 '''---------- Адмінка: добавити/змінити/видалити продукт -----------'''
@@ -117,6 +115,12 @@ async def orm_add_user(
         await session.commit()
 
 
+async def orm_get_user_details(session: AsyncSession, user_id: int):
+    query = select(User).where(User.user_id == user_id)
+    result = await session.execute(query)
+    return result.scalar()
+
+
 '''------------------------- Робота із кошиком -------------------------'''
 
 async def orm_add_to_cart(session: AsyncSession, user_id: int, product_id: int):
@@ -130,7 +134,6 @@ async def orm_add_to_cart(session: AsyncSession, user_id: int, product_id: int):
     else:
         session.add(Cart(user_id=user_id, product_id=product_id, quantity=1))
         await session.commit()
-
 
 
 async def orm_get_user_carts(session: AsyncSession, user_id):
@@ -161,5 +164,29 @@ async def orm_reduce_product_in_cart(session: AsyncSession, user_id: int, produc
         await session.commit()
         return False
 
+'''------------------------- Збереження замовлення -------------------------'''
 
+async def orm_save_order(session: AsyncSession, order_data: dict):
+    async with session.begin():
+        # Додати основне замовлення
+        new_order = Order(
+            user_id=order_data["user_id"],
+            user_phone=order_data["user_phone"],
+            delivery_address=order_data["delivery_address"],
+            comment=order_data.get("comment", ""),
+            total_price=order_data["total_price"],
+        )
+        session.add(new_order)
+        await session.flush()  # Отримати ID нового замовлення
 
+        # Додати товари замовлення
+        for item in order_data["items"]:
+            order_item = OrderItem(
+                order_id=new_order.id,
+                product_id=item["product_id"],
+                name=item["name"],
+                quantity=item["quantity"],
+                price_per_unit=item["price_per_unit"],
+                total_price=item["total_price"],
+            )
+            session.add(order_item)
