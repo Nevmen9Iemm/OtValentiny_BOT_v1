@@ -11,16 +11,11 @@ load_dotenv(find_dotenv())
 
 from middlewares.db import DataBaseSession
 
-from database.engine import create_db, drop_db, session_maker
+from database.engine import create_db, drop_db, session_maker, create_tables
 
 from handlers.user_private import user_private_router
 from handlers.user_group import user_group_router
 from handlers.admin_private import admin_router
-
-# from common.bot_cmds_list import private
-
-
-# ALLOWED_UPDATES = ['message', 'edited_message', 'callback_query']
 
 bot = Bot(
     token=os.getenv('TOKEN'),
@@ -37,25 +32,40 @@ dp.include_router(admin_router)
 
 
 async def on_startup(bot):
-
-    # await drop_db()
-
+    """
+    Дії, які виконуються при запуску бота.
+    """
+    # Створення бази даних
     await create_db()
+
+    # Створення таблиць у базі даних
+    print("Перевіряємо таблиці в базі даних...")
+    await create_tables()
+    print("Таблиці успішно створені!")
 
 
 async def on_shutdown(bot):
+    """
+    Дії, які виконуються при вимкненні бота.
+    """
     print('БОТ ЛІГ')
 
 
 async def main():
+    """
+    Основна функція для запуску бота.
+    """
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
+    # Додавання middleware для роботи з базою даних
     dp.update.middleware(DataBaseSession(session_pool=session_maker))
 
+    # Налаштування webhook або polling
     await bot.delete_webhook(drop_pending_updates=True)
-    # await bot.delete_my_commands(scope=types.BotCommandScopeAllPrivateChats())
-    # await bot.set_my_commands(commands=private, scope=types.BotCommandScopeAllPrivateChats())
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
-asyncio.run(main())
+
+# Запуск бота
+if __name__ == "__main__":
+    asyncio.run(main())
