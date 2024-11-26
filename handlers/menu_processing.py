@@ -61,15 +61,30 @@ def pages(paginator: Paginator):
 
 
 async def products(session, level, category, page):
+    # Отримання продуктів
     products = await orm_get_products(session, category_id=category)
 
+    # Перевірка, чи список продуктів не порожній
+    if not products:
+        return InputMediaPhoto(
+            media="banners/empty_category.jpg",  # Замініть на зображення для порожньої категорії
+            caption="У цій категорії наразі немає продуктів."
+        ), None
+
     paginator = Paginator(products, page=page)
+
+    # Перевірка, чи є продукти на цій сторінці
+    if not paginator.get_page():
+        return InputMediaPhoto(
+            media="banners/no_products.jpg",  # Замініть на зображення для порожньої сторінки
+            caption="На цій сторінці немає продуктів."
+        ), None
+
     product = paginator.get_page()[0]
 
     image = InputMediaPhoto(
         media=product.image,
-        caption=f"<strong>{product.name}\
-                </strong>\n{product.description}\nВартість: {round(product.price, 2)}\n\
+        caption=f"<strong>{product.name}</strong>\n{product.description}\nВартість: {round(product.price, 2)}\n\
                 <strong>Продукт {paginator.page} з {paginator.pages}</strong>",
     )
 
