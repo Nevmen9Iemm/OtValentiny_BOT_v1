@@ -11,7 +11,7 @@ load_dotenv(find_dotenv())
 
 from middlewares.db import DataBaseSession
 
-from database.engine import create_tables, drop_db, session_maker, create_tables
+from database.engine import create_db, drop_db, session_maker, create_tables
 
 from handlers.user_private import user_private_router
 from handlers.user_group import user_group_router
@@ -36,7 +36,10 @@ async def on_startup(bot):
     Дії, які виконуються при запуску бота.
     """
     # Створення бази даних
-    await create_tables()
+    await create_db()
+
+    # Видалення таблиць у базі даних
+    # await drop_db()
 
     # Створення таблиць у базі даних
     print("Перевіряємо таблиці в базі даних...")
