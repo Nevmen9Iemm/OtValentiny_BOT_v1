@@ -9,6 +9,8 @@ from database.orm_query import (
     orm_get_products,
     orm_get_user_carts,
     orm_reduce_product_in_cart,
+    orm_save_order,  # Нова функція для збереження замовлення
+    orm_get_user_details,  # Функція для отримання інформації про користувача
 )
 from kbds.inline import (
     get_products_btns,
@@ -20,71 +22,62 @@ from kbds.inline import (
 from utils.paginator import Paginator
 
 
-async def main_menu(session, level, menu_name):
-    banner = await orm_get_banner(session, menu_name)
+async def process_order(session: AsyncSession, user_id: int):
+    """
+    Обробка кнопки "Замовити".
+    """
+    # Отримати інформацію про користувача
+    user_details = await orm_get_user_details(session, user_id)
+    if not user_details:
+        return "Будь ласка, заповніть ваші дані для доставки."
 
-    if banner is None:
-        print(f"[main_menu] Банер із назвою '{menu_name}' не знайдено!")
-        return InputMediaPhoto(
-            media="banners/default.png",  # Заглушка
-            caption="Інформація наразі недоступна."
-        ), get_user_main_btns(level=level)
+    # Отримати кошик користувача
+    user_cart = await orm_get_user_carts(session, user_id)
+    if not user_cart:
+        return "Ваш кошик порожній."
 
-    image = InputMediaPhoto(media=banner.image, caption=banner.description)
-    kbds = get_user_main_btns(level=level)
-    return image, kbds
+    # Формування даних замовлення
+    total_price = round(sum(cart.quantity * cart.product.price for cart in user_cart), 2)
+    order_items = [
+        {
+            "product_id": cart.product.id,
+            "name": cart.product.name,
+            "quantity": cart.quantity,
+            "price_per_unit": cart.product.price,
+            "total_price": round(cart.quantity * cart.product.price, 2),
+        }
+        for cart in user_cart
+    ]
 
+    order_data = {
+        "user_id": user_id,
+        "user_phone": user_details.phone,
+        "delivery_address": user_details.address,
+        "comment": user_details.comment,
+        "total_price": total_price,
+        "items": order_items,
+    }
 
-async def catalog(session, level, menu_name):
-    banner = await orm_get_banner(session, menu_name)
-    if banner is None:
-        print(f"Банер із назвою '{menu_name}' не знайдено!")
-        return None, get_user_catalog_btns(level=level, categories=[])
+    # Зберегти замовлення в базу даних
+    await orm_save_order(session, order_data)
 
-    image = InputMediaPhoto(media=banner.image, caption=banner.description)
-    categories = await orm_get_categories(session)
-    kbds = get_user_catalog_btns(level=level, categories=categories)
-    return image, kbds
+    # Очистити кошик користувача
+    for cart in user_cart:
+        await orm_delete_from_cart(session, user_id, cart.product.id)
 
-
-def pages(paginator: Paginator):
-    btns = dict()
-    if paginator.has_previous():
-        btns["◀ Попер."] = "previous"
-
-    if paginator.has_next():
-        btns["Слід. ▶"] = "next"
-
-    return btns
-
-
-async def products(session, level, category, page):
-    products = await orm_get_products(session, category_id=category)
-
-    paginator = Paginator(products, page=page)
-    product = paginator.get_page()[0]
-
-    image = InputMediaPhoto(
-        media=product.image,
-        caption=f"<strong>{product.name}\
-                </strong>\n{product.description}\nВартість: {round(product.price, 2)}\n\
-                <strong>Продукт {paginator.page} з {paginator.pages}</strong>",
-    )
-
-    pagination_btns = pages(paginator)
-
-    kbds = get_products_btns(
-        level=level,
-        category=category,
-        page=page,
-        pagination_btns=pagination_btns,
-        product_id=product.id,
-    )
-
-    return image, kbds
+    return f"Замовлення оформлено! Загальна сума: {total_price}$"
 
 
 async def carts(session, level, menu_name, page, user_id, product_id):
+    if menu_name == "order":
+        # Обробка кнопки "Замовити"
+        response = await process_order(session, user_id)
+        return InputMediaPhoto(
+            media="banners/confirmation",  # Замініть на зображення підтвердження
+            caption=response,
+        ), None
+
+    # Решта функціоналу залишиться без змін
     if menu_name == "delete":
         await orm_delete_from_cart(session, user_id, product_id)
         if page > 1:
@@ -136,30 +129,3 @@ async def carts(session, level, menu_name, page, user_id, product_id):
         )
 
     return image, kbds
-
-
-async def get_menu_content(
-    session: AsyncSession,
-    level: int,
-    menu_name: str,
-    category: int | None = None,
-    page: int | None = None,
-    product_id: int | None = None,
-    user_id: int | None = None,
-):
-    if level == 0:
-        result = await main_menu(session, level, menu_name)
-    elif level == 1:
-        result = await catalog(session, level, menu_name)
-    elif level == 2:
-        result = await products(session, level, category, page)
-    elif level == 3:
-        result = await carts(session, level, menu_name, page, user_id, product_id)
-    else:
-        result = None, None
-
-    if result is None:
-        print("Меню не знайдено!")
-        return None, None  # Повідомте користувача або повертайте заглушку
-
-    return result
