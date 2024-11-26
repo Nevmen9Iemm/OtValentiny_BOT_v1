@@ -9,6 +9,8 @@ from database.models import Banner, Cart, Category, Product, User, Order, OrderI
 '''-------- Робота з банерами (інформаційні сторінки) --------------'''
 
 async def orm_add_banner_description(session: AsyncSession, data: dict):
+    '''Додаємо новий або змінюємо існуючий по іменам
+    пунктів меню: main, about, cart, shipping, payment, catalog'''
     query = select(Banner)
     result = await session.execute(query)
     if result.first():
@@ -116,6 +118,9 @@ async def orm_add_user(
 
 
 async def orm_get_user_details(session: AsyncSession, user_id: int):
+    """
+    Отримує дані користувача (телефон, ім'я тощо).
+    """
     query = select(User).where(User.user_id == user_id)
     result = await session.execute(query)
     return result.scalar()
@@ -164,9 +169,13 @@ async def orm_reduce_product_in_cart(session: AsyncSession, user_id: int, produc
         await session.commit()
         return False
 
+
 '''------------------------- Збереження замовлення -------------------------'''
 
 async def orm_save_order(session: AsyncSession, order_data: dict):
+    """
+    Зберігає замовлення в базу даних.
+    """
     async with session.begin():
         # Додати основне замовлення
         new_order = Order(
