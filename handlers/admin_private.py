@@ -76,12 +76,12 @@ async def delete_product_callback(callback: types.CallbackQuery, session: AsyncS
     await callback.message.answer("Товар видалено!")
 
 
-################# Микро FSM для загрузки/изменения баннеров ############################
+################# Мікро FSM для завантаження/зміни банерів ############################
 
 class AddBanner(StatesGroup):
     image = State()
 
-# Отправляем перечень информационных страниц бота и становимся в состояние отправки photo
+# Відправляємо перелік інформаційних сторінок бота і встановлюємо стан відправки фото
 @admin_router.message(StateFilter(None), F.text == 'Додати/Змінити банер')
 async def add_image2(message: types.Message, state: FSMContext, session: AsyncSession):
     pages_names = [page.name for page in await orm_get_info_pages(session)]
@@ -89,8 +89,8 @@ async def add_image2(message: types.Message, state: FSMContext, session: AsyncSe
                          \n{', '.join(pages_names)}")
     await state.set_state(AddBanner.image)
 
-# Добавляем/изменяем изображение в таблице (там уже есть записанные страницы по именам:
-# main, catalog, cart(для пустой корзины), about, payment, shipping
+# Додаємо/змінюємо зображення в таблиці (там вже є записані сторінки по іменам:
+# main, catalog, cart(для пустого кошика), about, payment, shipping)
 @admin_router.message(AddBanner.image, F.photo)
 async def add_banner(message: types.Message, state: FSMContext, session: AsyncSession):
     image_id = message.photo[-1].file_id
@@ -104,7 +104,7 @@ async def add_banner(message: types.Message, state: FSMContext, session: AsyncSe
     await message.answer("Банер доданий/змінений.")
     await state.clear()
 
-# ловим некоррекный ввод
+# ловим некоректне введення
 @admin_router.message(AddBanner.image)
 async def add_banner2(message: types.Message, state: FSMContext):
     await message.answer("Надішліть фото банера або скасування")
@@ -113,7 +113,7 @@ async def add_banner2(message: types.Message, state: FSMContext):
 
 
 
-######################### FSM для дабавления/изменения товаров админом ###################
+######################### FSM для додовання/змінення товарів адміном ###################
 
 class AddProduct(StatesGroup):
     # Шаги состояний
@@ -134,7 +134,7 @@ class AddProduct(StatesGroup):
     }
 
 
-# Становимся в состояние ожидания ввода name
+# Стаємо в стан очікування вводу name
 @admin_router.callback_query(StateFilter(None), F.data.startswith("change_"))
 async def change_product_callback(
     callback: types.CallbackQuery, state: FSMContext, session: AsyncSession
@@ -152,7 +152,7 @@ async def change_product_callback(
     await state.set_state(AddProduct.name)
 
 
-# Становимся в состояние ожидания ввода name
+# Стаємо в стан очікування вводу name
 @admin_router.message(StateFilter(None), F.text == "Додати продукт")
 async def add_product(message: types.Message, state: FSMContext):
     await message.answer(
@@ -161,8 +161,9 @@ async def add_product(message: types.Message, state: FSMContext):
     await state.set_state(AddProduct.name)
 
 
-# Хендлер отмены и сброса состояния должен быть всегда именно здесь,
-# после того, как только встали в состояние номер 1 (элементарная очередность фильтров)
+# Хендлер відміни та скидання стану повинен бути завжди тут
+# після того, як тільки стали в стан номер 1 (елементарна черга фільтрів)
+
 @admin_router.message(StateFilter("*"), Command("скасувати"))
 @admin_router.message(StateFilter("*"), F.text.casefold() == "скасувати")
 async def cancel_handler(message: types.Message, state: FSMContext) -> None:
@@ -175,7 +176,7 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
     await message.answer("Дії скасовані", reply_markup=ADMIN_KB)
 
 
-# Вернутся на шаг назад (на прошлое состояние)
+# Повернутись на крок назад (на попередній стан)
 @admin_router.message(StateFilter("*"), Command("назад"))
 @admin_router.message(StateFilter("*"), F.text.casefold() == "назад")
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
@@ -198,15 +199,15 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         previous = step
 
 
-# Ловим данные для состояние name и потом меняем состояние на description
+# Ловимо дані для стану name і потім міняємо стан на description
 @admin_router.message(AddProduct.name, F.text)
 async def add_name(message: types.Message, state: FSMContext):
     if message.text == "." and AddProduct.product_for_change:
         await state.update_data(name=AddProduct.product_for_change.name)
     else:
-        # Здесь можно сделать какую либо дополнительную проверку
-        # и выйти из хендлера не меняя состояние с отправкой соответствующего сообщения
-        # например:
+        # Тут можна зробити додаткову перевірку і вийти із стану хендлера
+        # не змінюючи стан з відправкою відповідного повідомлення
+        # наприклад, якщо введення більшого ніж 150 символів:
         if 4 >= len(message.text) >= 150:
             await message.answer(
                 "Назва продукту не повинна перевищувати 150 символів\nабо бути менше 5 символів. \n Введіть заново"
@@ -217,13 +218,13 @@ async def add_name(message: types.Message, state: FSMContext):
     await message.answer("Введіть опис продукту")
     await state.set_state(AddProduct.description)
 
-# Хендлер для отлова некорректных вводов для состояния name
+# Хендлер для відлову некоректных вводів для стану name
 @admin_router.message(AddProduct.name)
 async def add_name2(message: types.Message, state: FSMContext):
     await message.answer("Ви ввели неприпустимі дані, введіть текст назви продукту")
 
 
-# Ловим данные для состояние description и потом меняем состояние на price
+# Ловимо дані для стану description =і потім міняємо стан на price
 @admin_router.message(AddProduct.description, F.text)
 async def add_description(message: types.Message, state: FSMContext, session: AsyncSession):
     if message.text == "." and AddProduct.product_for_change:
@@ -241,13 +242,13 @@ async def add_description(message: types.Message, state: FSMContext, session: As
     await message.answer("Виберіть категорію", reply_markup=get_callback_btns(btns=btns))
     await state.set_state(AddProduct.category)
 
-# Хендлер для отлова некорректных вводов для состояния description
+# Хендлер для відлову некоректних вводів для стану description
 @admin_router.message(AddProduct.description)
 async def add_description2(message: types.Message, state: FSMContext):
     await message.answer("Ви ввели недопустимі дані, введіть текст опису продукту")
 
 
-# Ловим callback выбора категории
+# Ловимо callback вибору категорії
 @admin_router.callback_query(AddProduct.category)
 async def category_choice(callback: types.CallbackQuery, state: FSMContext , session: AsyncSession):
     if int(callback.data) in [category.id for category in await orm_get_categories(session)]:
@@ -259,13 +260,13 @@ async def category_choice(callback: types.CallbackQuery, state: FSMContext , ses
         await callback.message.answer('Виберіть категорію з кнопок.')
         await callback.answer()
 
-#Ловим любые некорректные действия, кроме нажатия на кнопку выбора категории
+#Ловимо любі некоректні дії, окрім натискання на кнопку вибору категорії
 @admin_router.message(AddProduct.category)
 async def category_choice2(message: types.Message, state: FSMContext):
     await message.answer("'Виберіть категорію з кнопок.'")
 
 
-# Ловим данные для состояние price и потом меняем состояние на image
+# Ловимо дані для стану price і потім міняємо стан на image
 @admin_router.message(AddProduct.price, F.text)
 async def add_price(message: types.Message, state: FSMContext):
     if message.text == "." and AddProduct.product_for_change:
@@ -281,13 +282,13 @@ async def add_price(message: types.Message, state: FSMContext):
     await message.answer("Завантажте зображення продукту")
     await state.set_state(AddProduct.image)
 
-# Хендлер для отлова некорректных ввода для состояния price
+# Хендлер для відлову некоректного вводу для стану price
 @admin_router.message(AddProduct.price)
 async def add_price2(message: types.Message, state: FSMContext):
     await message.answer("Ви ввели неприпустимі дані, введіть вартість продукту")
 
 
-# Ловим данные для состояние image и потом выходим из состояний
+# Ловимо дані для сстану image і потім виходимо із станів
 @admin_router.message(AddProduct.image, or_f(F.photo, F.text == "."))
 async def add_image(message: types.Message, state: FSMContext, session: AsyncSession):
     if message.text and message.text == "." and AddProduct.product_for_change:
@@ -316,7 +317,7 @@ async def add_image(message: types.Message, state: FSMContext, session: AsyncSes
 
     AddProduct.product_for_change = None
 
-# Ловим все прочее некорректное поведение для этого состояния
+# Ловимо всю іншу некоректну поведінку для цього стану
 @admin_router.message(AddProduct.image)
 async def add_image2(message: types.Message, state: FSMContext):
     await message.answer("Надішліть фото їжі")
