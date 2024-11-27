@@ -1,7 +1,7 @@
 import math
 
 
-# Простой пагинатор
+# Простbй пагінатор
 class Paginator:
     def __init__(self, array: list | tuple, page: int=1, per_page: int=1):
         self.array = array
@@ -34,10 +34,10 @@ class Paginator:
         if self.page < self.pages:
             self.page += 1
             return self.get_page()
-        raise IndexError(f'Next page does not exist. Use has_next() to check before.')
+        raise IndexError(f'Наступна сторінка не існує. Використовуйте has_next(), щоб перевірити раніше.')
 
     def get_previous(self):
         if self.page > 1:
             self.page -= 1
             return self.__get_slice()
-        raise IndexError(f'Previous page does not exist. Use has_previous() to check before.')
+        raise IndexError(f'Попередня сторінка не існує. Використовуйте has_previous(), щоб перевірити раніше.')
