@@ -1,82 +1,59 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text, BigInteger, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-# Ініціалізація базової моделі
-Base = declarative_base()
 
-# Існуючі моделі
+class Base(DeclarativeBase):
+    created: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
+    updated: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+
+
 class Banner(Base):
-    __tablename__ = "banners"
+    __tablename__ = 'banner'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, unique=True)
-    description = Column(Text, nullable=False)
-    image = Column(String, nullable=True)
-
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, unique=True, nullable=False)
-    first_name = Column(String, nullable=True)
-    last_name = Column(String, nullable=True)
-    phone = Column(String(20), nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(15), unique=True)
+    image: Mapped[str] = mapped_column(String(150), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
 
 
 class Category(Base):
-    __tablename__ = "categories"
+    __tablename__ = 'category'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
 
 
 class Product(Base):
-    __tablename__ = "products"
+    __tablename__ = 'product'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    description = Column(Text, nullable=False)
-    price = Column(Float, nullable=False)
-    image = Column(String, nullable=True)
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    description: Mapped[str] = mapped_column(Text)
+    price: Mapped[float] = mapped_column(Numeric(5,2), nullable=False)
+    image: Mapped[str] = mapped_column(String(150))
+    category_id: Mapped[int] = mapped_column(ForeignKey('category.id', ondelete='CASCADE'), nullable=False)
+
+    category: Mapped['Category'] = relationship(backref='product')
+
+
+class User(Base):
+    __tablename__ = 'user'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
+    first_name: Mapped[str] = mapped_column(String(150), nullable=True)
+    last_name: Mapped[str]  = mapped_column(String(150), nullable=True)
+    phone: Mapped[str]  = mapped_column(String(13), nullable=True)
 
 
 class Cart(Base):
-    __tablename__ = "carts"
+    __tablename__ = 'cart'
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
-    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
-    quantity = Column(Integer, default=1, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    quantity: Mapped[int]
 
-    product = relationship("Product")
+    user: Mapped['User'] = relationship(backref='cart')
+    product: Mapped['Product'] = relationship(backref='cart')
 
-
-# Нові моделі для замовлень
-class Order(Base):
-    __tablename__ = "orders"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
-    user_phone = Column(String(20), nullable=False)
-    delivery_address = Column(Text, nullable=False)
-    comment = Column(Text, nullable=True)
-    total_price = Column(Float, nullable=False)
-
-    items = relationship("OrderItem", back_populates="order")
-
-
-class OrderItem(Base):
-    __tablename__ = "order_items"
-
-    id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    product_id = Column(Integer, nullable=False)
-    name = Column(String(255), nullable=False)
-    quantity = Column(Integer, nullable=False)
-    price_per_unit = Column(Float, nullable=False)
-    total_price = Column(Float, nullable=False)
-
-    order = relationship("Order", back_populates="items")
