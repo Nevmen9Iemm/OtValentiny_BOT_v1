@@ -6,11 +6,11 @@ from sqlalchemy.orm import joinedload
 from database.models import Banner, Cart, Category, Product, User
 
 
-############### Работа с баннерами (информационными страницами) ###############
+############### Робота із банерами (інформаційними сторінками) ###############
 
 async def orm_add_banner_description(session: AsyncSession, data: dict):
-    #Добавляем новый или изменяем существующий по именам
-    #пунктов меню: main, about, cart, shipping, payment, catalog
+    #Додаємо новий або змінюємо існуючий по іменам
+    #пунктів меню: main, about, cart, shipping, payment, catalog
     query = select(Banner)
     result = await session.execute(query)
     if result.first():
@@ -37,7 +37,7 @@ async def orm_get_info_pages(session: AsyncSession):
     return result.scalars().all()
 
 
-############################ Категории ######################################
+############################ Категорії ######################################
 
 async def orm_get_categories(session: AsyncSession):
     query = select(Category)
@@ -52,7 +52,7 @@ async def orm_create_categories(session: AsyncSession, categories: list):
     session.add_all([Category(name=name) for name in categories]) 
     await session.commit()
 
-############ Админка: добавить/изменить/удалить товар ########################
+############ Адмінка: додати/змінити/видалити товар ########################
 
 async def orm_add_product(session: AsyncSession, data: dict):
     obj = Product(
@@ -99,7 +99,7 @@ async def orm_delete_product(session: AsyncSession, product_id: int):
     await session.execute(query)
     await session.commit()
 
-##################### Добавляем юзера в БД #####################################
+##################### Додаємо юзера в БД #####################################
 
 async def orm_add_user(
     session: AsyncSession,
@@ -117,7 +117,7 @@ async def orm_add_user(
         await session.commit()
 
 
-######################## Работа с корзинами #######################################
+######################## Робота із кошиком #######################################
 
 async def orm_add_to_cart(session: AsyncSession, user_id: int, product_id: int):
     query = select(Cart).where(Cart.user_id == user_id, Cart.product_id == product_id)
