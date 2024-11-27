@@ -11,7 +11,7 @@ load_dotenv(find_dotenv())
 
 from middlewares.db import DataBaseSession
 
-from database.engine import create_db, create_tables, drop_db, session_maker, create_tables
+from database.engine import create_db, drop_db, session_maker
 
 from handlers.user_private import user_private_router
 from handlers.user_group import user_group_router
@@ -42,9 +42,9 @@ async def on_startup(bot):
     # await drop_db()
 
     # Створення таблиць у базі даних
-    print("Перевіряємо таблиці в базі даних...")
-    await create_tables()
-    print("Таблиці успішно створені!")
+    # print("Перевіряємо таблиці в базі даних...")
+    # await create_tables()
+    # print("Таблиці успішно створені!")
 
 
 async def on_shutdown(bot):

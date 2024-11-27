@@ -1,5 +1,6 @@
 from aiogram.types import InputMediaPhoto
 from sqlalchemy.ext.asyncio import AsyncSession
+from database.orm_query import Paginator
 
 from database.orm_query import (
     orm_add_to_cart,

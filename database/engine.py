@@ -27,20 +27,20 @@ async def create_db():
         await orm_add_banner_description(session, description_for_info_pages)
 
 
-async def create_tables():
-    """
-    Створює таблиці в базі даних, якщо вони ще не створені.
-    Ініціалізує початкові дані, якщо необхідно.
-    """
-    async with engine.begin() as conn:
-        print("Створюємо таблиці в базі даних...")
-        await conn.run_sync(Base.metadata.create_all)
-
-    # Додавання початкових даних у базу
-    async with session_maker() as session:
-        await orm_create_categories(session, categories)
-        await orm_add_banner_description(session, description_for_info_pages)
-        print("Початкові дані успішно додано!")
+# async def create_tables():
+#     """
+#     Створює таблиці в базі даних, якщо вони ще не створені.
+#     Ініціалізує початкові дані, якщо необхідно.
+#     """
+#     async with engine.begin() as conn:
+#         print("Створюємо таблиці в базі даних...")
+#         await conn.run_sync(Base.metadata.create_all)
+#
+#     # Додавання початкових даних у базу
+#     async with session_maker() as session:
+#         await orm_create_categories(session, categories)
+#         await orm_add_banner_description(session, description_for_info_pages)
+#         print("Початкові дані успішно додано!")
 
 
 async def drop_db():

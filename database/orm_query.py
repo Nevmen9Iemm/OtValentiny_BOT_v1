@@ -6,7 +6,6 @@ from sqlalchemy.orm import joinedload
 from database.models import Banner, Cart, Category, Product, User, Order, OrderItem
 from handlers.menu_processing import pages
 
-
 # Простий пагінатор
 class Paginator:
     def __init__(self, array: list | tuple, page: int=1, per_page: int=1):
@@ -72,7 +71,6 @@ async def orm_get_info_pages(session: AsyncSession):
     query = select(Banner)
     result = await session.execute(query)
     return result.scalars().all()
-
 
 '''--------------------------- Категориї --------------------------'''
 
@@ -205,7 +203,6 @@ async def orm_reduce_product_in_cart(session: AsyncSession, user_id: int, produc
         await orm_delete_from_cart(session, user_id, product_id)
         await session.commit()
         return False
-
 
 '''------------------------- Збереження замовлення -------------------------'''
 
