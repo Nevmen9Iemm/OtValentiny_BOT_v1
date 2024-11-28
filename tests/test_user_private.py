@@ -5,4 +5,4 @@ user_private_router = Router()
 
 @user_private_router.message(commands=["start"])
 async def start_command(message: Message):
-    await message.answer("Ласкаво просимо до OtValentiny!")
+    await message.answer("Ласкаво просимо!")
