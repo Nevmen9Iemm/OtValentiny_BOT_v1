@@ -8,7 +8,7 @@ class Paginator:
         self.per_page = per_page
         self.page = page
         self.len = len(self.array)
-        # math.ceil - округление в большую сторону до целого числа
+        # math.ceil - округлення в більшу сторону до цілого числа
         self.pages = math.ceil(self.len / self.per_page)
 
     def __get_slice(self):

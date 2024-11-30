@@ -5,7 +5,14 @@ categories = ['Овочі', 'Фрукти', 'Екзотичні фрукти', '
 
 description_for_info_pages = {
     "main": "Ласкаво просимо!",
-    "about": "Продуктова крамниця OtValentiny.\nГрафік доставки замовлень - 9:00 - 21:00.",
+    "about": as_marked_section(
+        Bold("Продуктова крамниця OtValentiny:\n"),
+        "website: \nhttps://otvalentiny.od.ua/\n",
+        "Insgram: \nhttps://www.instagram.com/otvalentiny.od/\n",
+        "Facebook: \nhttps://www.facebook.com/otvalentiny.odessa/\n",
+        "YouTube: \nhttps://www.youtube.com/channel/UC5klFLutAm3HEOcaV3EeCHg\n"
+        "\nГрафік доставки замовлень - 9:00 - 21:00"
+    ).as_html(),
     "payment": as_marked_section(
         Bold("Варіанти розрахунку:"),
         "Термінал в магазині",

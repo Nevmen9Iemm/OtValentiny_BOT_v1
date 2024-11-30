@@ -64,7 +64,7 @@ def get_products_btns(
                 callback_data=MenuCallBack(level=level-1, menu_name='catalog').pack()))
     keyboard.add(InlineKeyboardButton(text='Кошик 🛒',
                 callback_data=MenuCallBack(level=3, menu_name='cart').pack()))
-    keyboard.add(InlineKeyboardButton(text='Купити 💵',
+    keyboard.add(InlineKeyboardButton(text='Додати в кошик 🧺',
                 callback_data=MenuCallBack(level=level, menu_name='add_to_cart', product_id=product_id).pack()))
 
     keyboard.adjust(*sizes)
