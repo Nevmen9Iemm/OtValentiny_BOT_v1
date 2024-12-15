@@ -16,7 +16,7 @@ user_group_router.edited_message.filter(ChatTypeFilter(["group", "supergroup"]))
 async def get_admins(message: types.Message, bot: Bot):
     chat_id = message.chat.id
     admins_list = await bot.get_chat_administrators(chat_id)
-    #подивитись всі дані і свойства отриманих обєктів
+    #подивитись всі дані і досьє отриманих обєктів
     #print(admins_list)
     # Код нижче це генератор списка, як і цей x = [i for i in range(10)]
     admins_list = [
