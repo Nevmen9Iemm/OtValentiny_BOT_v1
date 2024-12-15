@@ -7,7 +7,7 @@ description_for_info_pages = {
     "main": "Ласкаво просимо!",
     "about": as_marked_section(
         Bold("Продуктова крамниця OtValentiny:\n"),
-        "website: \nhttps://otvalentiny.od.ua/\n",
+        "Website: \nhttps://otvalentiny.od.ua/\n",
         "Insgram: \nhttps://www.instagram.com/otvalentiny.od/\n",
         "Facebook: \nhttps://www.facebook.com/otvalentiny.odessa/\n",
         "YouTube: \nhttps://www.youtube.com/channel/UC5klFLutAm3HEOcaV3EeCHg\n"
