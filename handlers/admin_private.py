@@ -116,7 +116,7 @@ async def add_banner2(message: types.Message, state: FSMContext):
 ######################### FSM для додовання/змінення товарів адміном ###################
 
 class AddProduct(StatesGroup):
-    # Шаги состояний
+    # Кроки станів
     name = State()
     description = State()
     category = State()
@@ -218,13 +218,13 @@ async def add_name(message: types.Message, state: FSMContext):
     await message.answer("Введіть опис продукту")
     await state.set_state(AddProduct.description)
 
-# Хендлер для відлову некоректных вводів для стану name
+# Хендлер для виловлювання некоректних вводів для стану name
 @admin_router.message(AddProduct.name)
 async def add_name2(message: types.Message, state: FSMContext):
     await message.answer("Ви ввели неприпустимі дані, введіть текст назви продукту")
 
 
-# Ловимо дані для стану description =і потім міняємо стан на price
+# Ловимо дані для стану description і потім міняємо стан на price
 @admin_router.message(AddProduct.description, F.text)
 async def add_description(message: types.Message, state: FSMContext, session: AsyncSession):
     if message.text == "." and AddProduct.product_for_change:
@@ -242,7 +242,7 @@ async def add_description(message: types.Message, state: FSMContext, session: As
     await message.answer("Виберіть категорію", reply_markup=get_callback_btns(btns=btns))
     await state.set_state(AddProduct.category)
 
-# Хендлер для відлову некоректних вводів для стану description
+# Хендлер для виловлення некоректних вводів для стану description
 @admin_router.message(AddProduct.description)
 async def add_description2(message: types.Message, state: FSMContext):
     await message.answer("Ви ввели недопустимі дані, введіть текст опису продукту")
@@ -282,13 +282,13 @@ async def add_price(message: types.Message, state: FSMContext):
     await message.answer("Завантажте зображення продукту")
     await state.set_state(AddProduct.image)
 
-# Хендлер для відлову некоректного вводу для стану price
+# Хендлер для виловлення некоректного вводу для стану price
 @admin_router.message(AddProduct.price)
 async def add_price2(message: types.Message, state: FSMContext):
     await message.answer("Ви ввели неприпустимі дані, введіть вартість продукту")
 
 
-# Ловимо дані для сстану image і потім виходимо із станів
+# Виловлюємо дані для стану image і потім виходимо із станів
 @admin_router.message(AddProduct.image, or_f(F.photo, F.text == "."))
 async def add_image(message: types.Message, state: FSMContext, session: AsyncSession):
     if message.text and message.text == "." and AddProduct.product_for_change:
@@ -317,7 +317,7 @@ async def add_image(message: types.Message, state: FSMContext, session: AsyncSes
 
     AddProduct.product_for_change = None
 
-# Ловимо всю іншу некоректну поведінку для цього стану
+# Виловлюємо всю іншу некоректну поведінку для цього стану
 @admin_router.message(AddProduct.image)
 async def add_image2(message: types.Message, state: FSMContext):
     await message.answer("Надішліть фото їжі")
