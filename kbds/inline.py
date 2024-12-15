@@ -123,8 +123,8 @@ def get_user_cart(
         row2 = [
         InlineKeyboardButton(text='На головну 🏡',
                     callback_data=MenuCallBack(level=0, menu_name='main').pack()),
-        InlineKeyboardButton(text='Заказати',
-                    callback_data=MenuCallBack(level=0, menu_name='order').pack()),
+        # InlineKeyboardButton(text='Заказати',
+        #             callback_data=MenuCallBack(level=0, menu_name='order').pack()),
         ]
         return keyboard.row(*row2).as_markup()
     else:
