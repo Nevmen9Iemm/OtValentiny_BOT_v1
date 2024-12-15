@@ -34,7 +34,7 @@ async def add_to_cart(callback: types.CallbackQuery, callback_data: MenuCallBack
         phone=None,
     )
     await orm_add_to_cart(session, user_id=user.id, product_id=callback_data.product_id)
-    await callback.answer("Продукт доданий в корзину.")
+    await callback.answer(show_alert=True, text="Продукт доданий в кошик.")
 
 
 @user_private_router.callback_query(MenuCallBack.filter())
