@@ -8,3 +8,4 @@ async def test_dispatcher_includes_routers():
     assert user_private_router in dp.routers
     assert user_group_router in dp.routers
     assert admin_router in dp.routers
+    assert any(isinstance(m, DataBaseSession) for m in dp.middleware)
